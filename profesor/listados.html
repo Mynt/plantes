@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Listados de referencia — Profesorado</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <p><a href="index.html">&larr; Panel de corrección</a></p>
+
+    <form id="login-form" class="card">
+      <h1>Acceso profesorado</h1>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" required />
+      </div>
+      <div class="field">
+        <label for="password">Contraseña</label>
+        <input id="password" type="password" required />
+      </div>
+      <button type="submit" class="btn btn-primary">Entrar</button>
+      <p id="login-status" class="muted"></p>
+    </form>
+
+    <div id="panel" hidden>
+      <form id="new-list-form" class="card">
+        <h2>Nuevo listado</h2>
+        <div class="field">
+          <label>Título</label>
+          <input id="new-title" required />
+        </div>
+        <div class="field">
+          <label>Texto explicativo para el alumnado</label>
+          <textarea id="new-text" rows="3" required></textarea>
+        </div>
+        <div class="field">
+          <label>Nombres de planta (uno por línea)</label>
+          <textarea id="new-plant-names" rows="4" required placeholder="Romero&#10;Tomillo&#10;Lavanda"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Crear listado</button>
+        <p id="new-list-status" class="muted"></p>
+      </form>
+
+      <div id="lists-container"></div>
+    </div>
+  </div>
+
+  <script type="module" src="listados.js"></script>
+</body>
+</html>
