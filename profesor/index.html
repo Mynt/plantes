@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel de profesorado</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <p><a href="../">&larr; Volver</a> · <a href="listados.html">Gestionar listados</a></p>
+
+    <form id="login-form" class="card">
+      <h1>Acceso profesorado</h1>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" required />
+      </div>
+      <div class="field">
+        <label for="password">Contraseña</label>
+        <input id="password" type="password" required />
+      </div>
+      <button type="submit" class="btn btn-primary">Entrar</button>
+      <p id="login-status" class="muted"></p>
+    </form>
+
+    <div id="panel" hidden>
+      <div class="card">
+        <button id="logout" class="btn btn-secondary">Cerrar sesión</button>
+        <button id="export" class="btn btn-secondary">Exportar JSON</button>
+      </div>
+      <div id="submissions-list"></div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
