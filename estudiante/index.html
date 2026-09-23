@@ -3,57 +3,62 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Entregar identificación — Alumnado</title>
+  <title data-i18n="estudianteTitle">Entregar identificación — Alumnado</title>
   <link rel="stylesheet" href="../styles.css" />
 </head>
 <body>
   <div class="container">
-    <p><a href="../">&larr; Volver</a></p>
+    <div id="lang-switch"></div>
+    <p><a href="../" data-i18n="backLink">&larr; Volver</a></p>
 
     <div id="list-info" class="card" hidden>
       <h1 id="list-title"></h1>
       <p id="list-text" class="muted"></p>
-      <p class="muted">Plantas a identificar: <span id="list-names"></span></p>
+      <p class="muted"><span data-i18n="plantsToIdentifyLabel">Plantas a identificar:</span> <span id="list-names"></span></p>
     </div>
 
     <div id="result-photos" class="card" hidden>
-      <h2>Fotos correctas</h2>
+      <h2 data-i18n="resultPhotosHeading">Fotos correctas</h2>
       <div id="result-photos-list"></div>
     </div>
 
     <form id="submission-form" class="card">
-      <h1 id="form-title">Nuevo conjunto</h1>
+      <h1 id="form-title" data-i18n="newSetTitle">Nuevo conjunto</h1>
 
       <div class="field">
-        <label for="alias">Alias (no pongas tu nombre completo)</label>
+        <label for="alias" data-i18n="aliasLabel">Alias (no pongas tu nombre completo)</label>
         <input id="alias" name="alias" required />
       </div>
       <div class="field">
-        <label for="institute">Instituto / centro</label>
+        <label for="institute" data-i18n="instituteLabel">Instituto / centro</label>
         <input id="institute" name="institute" required />
       </div>
       <div class="field">
-        <label for="title">Título del conjunto (opcional)</label>
+        <label for="title" data-i18n="titleLabel">Título del conjunto (opcional)</label>
         <input id="title" name="title" />
       </div>
       <div class="field">
-        <label for="date">Fecha de observación</label>
+        <label for="date" data-i18n="dateLabel">Fecha de observación</label>
         <input id="date" name="date" type="date" />
       </div>
 
-      <p class="muted">Las fotos deben ser solo de plantas. No incluyas personas reconocibles.</p>
+      <p class="muted" data-i18n="privacyWarning">Las fotos deben ser solo de plantas. No incluyas personas reconocibles.</p>
 
       <div id="plants-container"></div>
 
-      <button type="button" id="add-plant" class="btn btn-secondary">
+      <button type="button" id="add-plant" class="btn btn-secondary" data-i18n="addPlantBtn">
         + Añadir planta
       </button>
       <hr />
-      <button type="submit" class="btn btn-primary">Enviar conjunto</button>
+      <button type="submit" class="btn btn-primary" data-i18n="submitBtn">Enviar conjunto</button>
       <p id="status" class="muted"></p>
     </form>
   </div>
 
+  <script type="module">
+    import { renderLangSwitcher } from "../i18n.js";
+    renderLangSwitcher(document.getElementById("lang-switch"));
+  </script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -9,6 +9,7 @@ import {
   where,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { isSubmissionComplete } from "../lib/completeness.js";
+import { t } from "../i18n.js";
 
 const params = new URLSearchParams(window.location.search);
 const listCode = params.get("lista");
@@ -28,13 +29,13 @@ async function loadActiveList() {
       const q = query(collection(db, "plantLists"), where("code", "==", listCode));
       snap = await getDocs(q);
     } catch (err) {
-      statusEl.textContent = "No se pudo cargar el listado. Comprueba tu conexión.";
+      statusEl.textContent = t("listLoadError");
       form.hidden = true;
       return;
     }
 
     if (snap.empty) {
-      statusEl.textContent = "El enlace del listado no es válido.";
+      statusEl.textContent = t("listInvalidLink");
       form.hidden = true;
       return;
     }
@@ -91,21 +92,21 @@ function addPlantCard(refPlant = null) {
   card.dataset.index = String(index);
   if (refPlant) card.dataset.refPlantId = refPlant.id;
   card.innerHTML = `
-    <h3>${refPlant ? refPlant.name : "Planta " + index}</h3>
+    <h3>${refPlant ? refPlant.name : t("plantDefaultTitle", { n: index })}</h3>
     <div class="field">
-      <label>${refPlant ? "Tu identificación" : "Nombre propuesto"}</label>
+      <label>${refPlant ? t("plantNameLabelRef") : t("plantNameLabelFree")}</label>
       <input class="plant-name" required />
     </div>
     <div class="field">
-      <label>Lugar / hábitat</label>
+      <label>${t("plantHabitatLabel")}</label>
       <input class="plant-habitat" />
     </div>
     <div class="field">
-      <label>Observaciones</label>
+      <label>${t("plantNotesLabel")}</label>
       <textarea class="plant-notes" rows="2"></textarea>
     </div>
     <div class="field">
-      <label>Fotos</label>
+      <label>${t("plantPhotosLabel")}</label>
       <input class="plant-photos" type="file" accept="image/*" multiple />
     </div>
   `;
@@ -149,14 +150,14 @@ async function readPlantCards() {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  statusEl.textContent = "Enviando…";
+  statusEl.textContent = t("sendingStatus");
   form.querySelector('button[type="submit"]').disabled = true;
 
   try {
     const user = await userReady;
     const plants = await readPlantCards();
     if (plants.length === 0) {
-      throw new Error("Añade al menos una planta con nombre propuesto.");
+      throw new Error(t("errNoPlants"));
     }
 
     const submissionId = activeList
@@ -186,7 +187,7 @@ form.addEventListener("submit", async (event) => {
 
     await setDoc(doc(db, "submissions", submissionId), submission);
 
-    statusEl.textContent = "¡Conjunto enviado! Gracias.";
+    statusEl.textContent = t("sentStatus");
 
     if (activeList) {
       // List-bound submission: hide form (one submission per student per list)
@@ -206,9 +207,9 @@ form.addEventListener("submit", async (event) => {
       // A legitimate first-time create for a fresh uid never hits
       // permission-denied on a list-bound submission — this means the
       // student already has a submission doc for this list.
-      statusEl.textContent = "Ya has entregado tu identificación para este listado.";
+      statusEl.textContent = t("alreadySubmitted");
     } else {
-      statusEl.textContent = "Error: " + err.message;
+      statusEl.textContent = t("errorPrefix") + err.message;
     }
   } finally {
     form.querySelector('button[type="submit"]').disabled = false;

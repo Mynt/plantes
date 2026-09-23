@@ -1,4 +1,5 @@
 import { auth, db } from "../app.js";
+import { t } from "../i18n.js";
 import {
   signInWithEmailAndPassword,
   signOut,
@@ -24,7 +25,7 @@ function escapeHtml(str) {
 
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  loginStatus.textContent = "Entrando…";
+  loginStatus.textContent = t("loggingInStatus");
   try {
     await signInWithEmailAndPassword(
       auth,
@@ -32,7 +33,7 @@ loginForm.addEventListener("submit", async (event) => {
       document.getElementById("password").value
     );
   } catch (err) {
-    loginStatus.textContent = "Error: " + err.message;
+    loginStatus.textContent = t("errorPrefix") + err.message;
   }
 });
 
@@ -46,8 +47,7 @@ onAuthStateChanged(auth, async (user) => {
   }
   const token = await user.getIdTokenResult();
   if (!token.claims.teacher) {
-    loginStatus.textContent =
-      "Esta cuenta no tiene permisos de profesorado.";
+    loginStatus.textContent = t("notTeacherError");
     await signOut(auth);
     return;
   }
@@ -57,7 +57,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 async function renderSubmissions() {
-  submissionsList.innerHTML = "Cargando…";
+  submissionsList.innerHTML = t("loadingStatus");
   const snap = await getDocs(collection(db, "submissions"));
   submissionsList.innerHTML = "";
 
@@ -67,18 +67,18 @@ async function renderSubmissions() {
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `
-        <h2>${escapeHtml(submission.title) || "(sin título)"} — ${escapeHtml(submission.studentAlias)}</h2>
+        <h2>${escapeHtml(submission.title) || t("noTitle")} — ${escapeHtml(submission.studentAlias)}</h2>
         <p class="muted">${escapeHtml(submission.institute)} · ${escapeHtml(submission.date || "")}</p>
         <div class="plants"></div>
         <div class="field">
-          <label>Nota final (0-10)</label>
+          <label>${t("gradeLabel")}</label>
           <input type="number" min="0" max="10" class="grade-input" value="${escapeHtml(submission.assessment?.grade ?? "")}" />
         </div>
         <div class="field">
-          <label>Comentario general</label>
+          <label>${t("generalCommentLabel")}</label>
           <textarea class="teacher-comment" rows="2">${escapeHtml(submission.assessment?.teacherComment || "")}</textarea>
         </div>
-        <button class="btn btn-primary save-btn">Guardar corrección</button>
+        <button class="btn btn-primary save-btn">${t("saveBtn")}</button>
         <p class="save-status muted"></p>
       `;
 
@@ -95,19 +95,19 @@ async function renderSubmissions() {
           <p class="muted">${escapeHtml(plant.habitat || "")} — ${escapeHtml(plant.notes || "")}</p>
           <div class="photo-grid"></div>
           <div class="field">
-            <label>Estado</label>
+            <label>${t("statusLabel")}</label>
             <select class="assessment-status">
-              <option value="pendiente" ${assessment.status === "pendiente" ? "selected" : ""}>Pendiente</option>
-              <option value="correcto" ${assessment.status === "correcto" ? "selected" : ""}>Correcto</option>
-              <option value="incorrecto" ${assessment.status === "incorrecto" ? "selected" : ""}>Incorrecto</option>
+              <option value="pendiente" ${assessment.status === "pendiente" ? "selected" : ""}>${t("statusPending")}</option>
+              <option value="correcto" ${assessment.status === "correcto" ? "selected" : ""}>${t("statusCorrect")}</option>
+              <option value="incorrecto" ${assessment.status === "incorrecto" ? "selected" : ""}>${t("statusIncorrect")}</option>
             </select>
           </div>
           <div class="field">
-            <label>Nombre correcto</label>
+            <label>${t("correctNameLabel")}</label>
             <input class="assessment-correct-name" value="${escapeHtml(assessment.correctName || "")}" />
           </div>
           <div class="field">
-            <label>Comentario</label>
+            <label>${t("commentLabel")}</label>
             <input class="assessment-comment" value="${escapeHtml(assessment.comment || "")}" />
           </div>
         `;
@@ -122,7 +122,7 @@ async function renderSubmissions() {
 
       card.querySelector(".save-btn").addEventListener("click", async () => {
         const statusEl = card.querySelector(".save-status");
-        statusEl.textContent = "Guardando…";
+        statusEl.textContent = t("savingStatus");
 
         const updatedPlants = plants.map((plant, idx) => {
           const plantCard = plantsEl.querySelector(
@@ -149,9 +149,9 @@ async function renderSubmissions() {
               updatedAt: new Date().toISOString(),
             },
           });
-          statusEl.textContent = "Guardado.";
+          statusEl.textContent = t("savedStatus");
         } catch (err) {
-          statusEl.textContent = "Error: " + err.message;
+          statusEl.textContent = t("errorPrefix") + err.message;
         }
       });
 
@@ -161,6 +161,10 @@ async function renderSubmissions() {
     }
   });
 }
+
+window.addEventListener("langchange", () => {
+  if (!panel.hidden) renderSubmissions();
+});
 
 document.getElementById("export").addEventListener("click", async () => {
   const snap = await getDocs(collection(db, "submissions"));

@@ -15,6 +15,7 @@ import {
   where,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { generateListCode } from "../lib/codegen.js";
+import { t } from "../i18n.js";
 
 const loginForm = document.getElementById("login-form");
 const loginStatus = document.getElementById("login-status");
@@ -30,7 +31,7 @@ function escapeHtml(str) {
 
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  loginStatus.textContent = "Entrando…";
+  loginStatus.textContent = t("loggingInStatus");
   try {
     await signInWithEmailAndPassword(
       auth,
@@ -38,7 +39,7 @@ loginForm.addEventListener("submit", async (event) => {
       document.getElementById("password").value
     );
   } catch (err) {
-    loginStatus.textContent = "Error: " + err.message;
+    loginStatus.textContent = t("errorPrefix") + err.message;
   }
 });
 
@@ -50,7 +51,7 @@ onAuthStateChanged(auth, async (user) => {
   }
   const token = await user.getIdTokenResult();
   if (!token.claims.teacher) {
-    loginStatus.textContent = "Esta cuenta no tiene permisos de profesorado.";
+    loginStatus.textContent = t("notTeacherError");
     await signOut(auth);
     return;
   }
@@ -62,7 +63,7 @@ onAuthStateChanged(auth, async (user) => {
 newListForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const statusEl = document.getElementById("new-list-status");
-  statusEl.textContent = "Creando…";
+  statusEl.textContent = t("creatingStatus");
 
   try {
     const listId = uuid();
@@ -74,7 +75,7 @@ newListForm.addEventListener("submit", async (event) => {
       .filter(Boolean);
 
     if (plantNames.length === 0) {
-      throw new Error("Añade al menos un nombre de planta.");
+      throw new Error(t("errNoPlantNames"));
     }
 
     const plants = plantNames.map((name) => ({ id: uuid(), name }));
@@ -95,15 +96,19 @@ newListForm.addEventListener("submit", async (event) => {
     });
 
     newListForm.reset();
-    statusEl.textContent = "Listado creado.";
+    statusEl.textContent = t("listCreatedStatus");
     await renderLists();
   } catch (err) {
-    statusEl.textContent = "Error: " + err.message;
+    statusEl.textContent = t("errorPrefix") + err.message;
   }
 });
 
+window.addEventListener("langchange", () => {
+  if (!panel.hidden) renderLists();
+});
+
 async function renderLists() {
-  listsContainer.innerHTML = "Cargando…";
+  listsContainer.innerHTML = t("loadingStatus");
   const snap = await getDocs(collection(db, "plantLists"));
   listsContainer.innerHTML = "";
 
@@ -126,13 +131,13 @@ async function renderLists() {
     card.className = "card";
     card.innerHTML = `
       <h2>${escapeHtml(list.title)}</h2>
-      <p class="muted">Enlace: <code>estudiante/?lista=${list.code}</code>
-        · <button class="btn btn-secondary copy-link">Copiar enlace</button>
+      <p class="muted">${t("linkLabel")} <code>estudiante/?lista=${list.code}</code>
+        · <button class="btn btn-secondary copy-link">${t("copyLinkBtn")}</button>
       </p>
-      <p class="muted">Entregas: ${complete} completas de ${total} recibidas.</p>
-      <p>${list.published ? '<span class="status-ok">Publicado</span>' : '<span class="status-bad">No publicado</span>'}</p>
+      <p class="muted">${t("submissionsCountText", { complete, total })}</p>
+      <p>${list.published ? `<span class="status-ok">${t("publishedStatus")}</span>` : `<span class="status-bad">${t("unpublishedStatus")}</span>`}</p>
       <button class="btn btn-primary toggle-publish">
-        ${list.published ? "Despublicar" : "Publicar fotos"}
+        ${list.published ? t("unpublishBtn") : t("publishBtn")}
       </button>
       <div class="plants"></div>
     `;
@@ -149,7 +154,7 @@ async function renderLists() {
             .join("")}
         </div>
         <input type="file" class="photo-input" accept="image/*" multiple />
-        <button class="btn btn-secondary upload-photos">Subir fotos</button>
+        <button class="btn btn-secondary upload-photos">${t("uploadPhotosBtn")}</button>
       `;
       plantCard.querySelector(".upload-photos").addEventListener(
         "click",

@@ -3,22 +3,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Identificación de plantas</title>
+  <title data-i18n="indexTitle">Identificación de plantas</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="container">
+    <div id="lang-switch"></div>
     <div class="card">
-      <h1>Identificación de plantas</h1>
-      <p class="muted">
+      <h1 data-i18n="indexHeading">Identificación de plantas</h1>
+      <p class="muted" data-i18n="indexIntro">
         Entrega tus fotos de plantas con la identificación propuesta, o
         entra al panel de profesorado para corregir y gestionar listados.
       </p>
       <p>
-        <a class="btn btn-primary" href="estudiante/">Soy alumno/a</a>
-        <a class="btn btn-secondary" href="profesor/">Soy profesor/a</a>
+        <a class="btn btn-primary" href="estudiante/" data-i18n="indexBtnStudent">Soy alumno/a</a>
+        <a class="btn btn-secondary" href="profesor/" data-i18n="indexBtnTeacher">Soy profesor/a</a>
       </p>
     </div>
   </div>
+
+  <script type="module">
+    import { renderLangSwitcher } from "./i18n.js";
+    renderLangSwitcher(document.getElementById("lang-switch"));
+  </script>
 </body>
 </html>
