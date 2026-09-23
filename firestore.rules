@@ -10,9 +10,17 @@ service cloud.firestore {
       return request.resource.data.plants.size() >= get(/databases/$(database)/documents/plantLists/$(listId)).data.plants.size();
     }
 
+    // Nota: el campo `assessment` a nivel de planta (dentro de `plants[]`) no se
+    // valida aquí — esta versión de las reglas de Firestore no permite iterar
+    // genéricamente sobre arrays de longitud desconocida. Un alumno podría, en
+    // teoría, crear su entrega con un `plants[].assessment` ya relleno, pero
+    // eso ya no es un vector XSS (el panel escapa todo al mostrarlo) y
+    // cualquier corrección real del profesorado lo sobrescribe: se acepta como
+    // residual cosmético documentado, no un descuido.
     match /submissions/{submissionId} {
       allow create: if request.auth != null
         && request.resource.data.authUid == request.auth.uid
+        && request.resource.data.assessment == {'grade': null, 'teacherComment': '', 'updatedAt': null}
         && (
           (
             'listId' in request.resource.data

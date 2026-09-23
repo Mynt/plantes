@@ -14,6 +14,11 @@ const params = new URLSearchParams(window.location.search);
 const listCode = params.get("lista");
 let activeList = null; // { listId, title, teacherText, plants: [{id, name}], published }
 
+// Resolve anonymous auth once at page load; both loadActiveList() (for the
+// speculative "show revealed photos" check) and the submit handler share this
+// same resolved user instead of each calling ensureAnonAuth() independently.
+const userReady = ensureAnonAuth();
+
 async function loadActiveList() {
   try {
     if (!listCode) return;
@@ -51,6 +56,17 @@ async function loadActiveList() {
       addPlantCard(plant);
     }
     addPlantBtn.hidden = true;
+
+    // Speculatively check whether this student already has a complete
+    // submission for a now-published list (the normal "revisit after the
+    // teacher publishes" flow). Silent no-op if not eligible yet: not
+    // published, or no completed submission for this uid yet.
+    try {
+      const user = await userReady;
+      await maybeShowResultPhotos(activeList.listId, user.uid);
+    } catch {
+      // Not eligible yet, or auth failed — leave the empty form as-is.
+    }
   } finally {
     // Enable submit button after list loads (or if no list needed)
     document.querySelector('button[type="submit"]').disabled = false;
@@ -137,7 +153,7 @@ form.addEventListener("submit", async (event) => {
   form.querySelector('button[type="submit"]').disabled = true;
 
   try {
-    const user = await ensureAnonAuth();
+    const user = await userReady;
     const plants = await readPlantCards();
     if (plants.length === 0) {
       throw new Error("Añade al menos una planta con nombre propuesto.");
@@ -186,7 +202,14 @@ form.addEventListener("submit", async (event) => {
       addPlantCard();
     }
   } catch (err) {
-    statusEl.textContent = "Error: " + err.message;
+    if (activeList && err.code === "permission-denied") {
+      // A legitimate first-time create for a fresh uid never hits
+      // permission-denied on a list-bound submission — this means the
+      // student already has a submission doc for this list.
+      statusEl.textContent = "Ya has entregado tu identificación para este listado.";
+    } else {
+      statusEl.textContent = "Error: " + err.message;
+    }
   } finally {
     form.querySelector('button[type="submit"]').disabled = false;
   }
