@@ -145,7 +145,7 @@ form.addEventListener("submit", async (event) => {
 
     const submissionId = activeList
       ? `${activeList.listId}_${user.uid}`
-      : uuid();
+      : `${user.uid}_${uuid()}`;
 
     const complete = activeList
       ? isSubmissionComplete(
