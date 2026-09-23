@@ -15,33 +15,46 @@ const listCode = params.get("lista");
 let activeList = null; // { listId, title, teacherText, plants: [{id, name}], published }
 
 async function loadActiveList() {
-  if (!listCode) return;
+  try {
+    if (!listCode) return;
 
-  const q = query(collection(db, "plantLists"), where("code", "==", listCode));
-  const snap = await getDocs(q);
-  if (snap.empty) {
-    statusEl.textContent = "El enlace del listado no es válido.";
-    form.hidden = true;
-    return;
+    let snap;
+    try {
+      const q = query(collection(db, "plantLists"), where("code", "==", listCode));
+      snap = await getDocs(q);
+    } catch (err) {
+      statusEl.textContent = "No se pudo cargar el listado. Comprueba tu conexión.";
+      form.hidden = true;
+      return;
+    }
+
+    if (snap.empty) {
+      statusEl.textContent = "El enlace del listado no es válido.";
+      form.hidden = true;
+      return;
+    }
+
+    const listDoc = snap.docs[0];
+    activeList = { listId: listDoc.id, ...listDoc.data() };
+
+    document.getElementById("form-title").textContent = activeList.title;
+    document.getElementById("list-info").hidden = false;
+    document.getElementById("list-title").textContent = activeList.title;
+    document.getElementById("list-text").textContent = activeList.teacherText;
+    document.getElementById("list-names").textContent = activeList.plants
+      .map((p) => p.name)
+      .join(", ");
+
+    plantsContainer.innerHTML = "";
+    plantCount = 0;
+    for (const plant of activeList.plants) {
+      addPlantCard(plant);
+    }
+    addPlantBtn.hidden = true;
+  } finally {
+    // Enable submit button after list loads (or if no list needed)
+    document.querySelector('button[type="submit"]').disabled = false;
   }
-
-  const listDoc = snap.docs[0];
-  activeList = { listId: listDoc.id, ...listDoc.data() };
-
-  document.getElementById("form-title").textContent = activeList.title;
-  document.getElementById("list-info").hidden = false;
-  document.getElementById("list-title").textContent = activeList.title;
-  document.getElementById("list-text").textContent = activeList.teacherText;
-  document.getElementById("list-names").textContent = activeList.plants
-    .map((p) => p.name)
-    .join(", ");
-
-  plantsContainer.innerHTML = "";
-  plantCount = 0;
-  for (const plant of activeList.plants) {
-    addPlantCard(plant);
-  }
-  addPlantBtn.hidden = true;
 }
 
 const plantsContainer = document.getElementById("plants-container");
@@ -50,6 +63,9 @@ const form = document.getElementById("submission-form");
 const statusEl = document.getElementById("status");
 
 let plantCount = 0;
+
+// Disable submit button until loadActiveList() finishes (prevents race condition with list-bound submissions)
+form.querySelector('button[type="submit"]').disabled = true;
 
 function addPlantCard(refPlant = null) {
   plantCount += 1;
@@ -155,10 +171,19 @@ form.addEventListener("submit", async (event) => {
     await setDoc(doc(db, "submissions", submissionId), submission);
 
     statusEl.textContent = "¡Conjunto enviado! Gracias.";
-    form.hidden = true;
 
-    if (activeList && complete) {
-      await maybeShowResultPhotos(activeList.listId, user.uid);
+    if (activeList) {
+      // List-bound submission: hide form (one submission per student per list)
+      form.hidden = true;
+      if (complete) {
+        await maybeShowResultPhotos(activeList.listId, user.uid);
+      }
+    } else {
+      // Free-form submission: reset form for next entry
+      form.reset();
+      plantsContainer.innerHTML = "";
+      plantCount = 0;
+      addPlantCard();
     }
   } catch (err) {
     statusEl.textContent = "Error: " + err.message;
