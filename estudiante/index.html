@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entregar identificación — Alumnado</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <p><a href="../">&larr; Volver</a></p>
+
+    <div id="list-info" class="card" hidden>
+      <h1 id="list-title"></h1>
+      <p id="list-text" class="muted"></p>
+      <p class="muted">Plantas a identificar: <span id="list-names"></span></p>
+    </div>
+
+    <div id="result-photos" class="card" hidden>
+      <h2>Fotos correctas</h2>
+      <div id="result-photos-list"></div>
+    </div>
+
+    <form id="submission-form" class="card">
+      <h1 id="form-title">Nuevo conjunto</h1>
+
+      <div class="field">
+        <label for="alias">Alias (no pongas tu nombre completo)</label>
+        <input id="alias" name="alias" required />
+      </div>
+      <div class="field">
+        <label for="institute">Instituto / centro</label>
+        <input id="institute" name="institute" required />
+      </div>
+      <div class="field">
+        <label for="title">Título del conjunto (opcional)</label>
+        <input id="title" name="title" />
+      </div>
+      <div class="field">
+        <label for="date">Fecha de observación</label>
+        <input id="date" name="date" type="date" />
+      </div>
+
+      <div id="plants-container"></div>
+
+      <button type="button" id="add-plant" class="btn btn-secondary">
+        + Añadir planta
+      </button>
+      <hr />
+      <button type="submit" class="btn btn-primary">Enviar conjunto</button>
+      <p id="status" class="muted"></p>
+    </form>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
