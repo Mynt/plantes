@@ -1,0 +1,113 @@
+ARQUITECTURA DEL PROYECTO: IDENTIFICACION DE PLANTAS
+=================================================
+
+OBJETIVO
+--------
+Aplicacion web estatica para que alumnado entregue conjuntos de fotografias de plantas junto a sus identificaciones propuestas. El profesorado puede revisar cada conjunto, marcar las identificaciones como correctas o incorrectas, escribir el nombre correcto, comentarios y una nota final.
+
+ARQUITECTURA
+------------
+- Frontend: HTML, CSS y JavaScript sin dependencias, alojado en GitHub Pages.
+- Datos y fotos: el ejemplo funciona localmente con localStorage para demostrar el flujo completo.
+- Produccion: GitHub Pages es alojamiento estatico; no guarda de forma compartida los envios ni puede procesar ficheros por si solo. Debe conectarse a un servicio externo para formularios, archivos y base de datos.
+
+ESTRUCTURA DEL REPOSITORIO
+--------------------------
+plantas-proyecto/
+├─ index.html                 Portada y accesos
+├─ styles.css                 Estilos comunes y diseno adaptable
+├─ app.js                     Utilidades compartidas y datos de ejemplo
+├─ estudiante/
+│  └─ index.html             Formulario para crear y enviar conjuntos
+├─ profesor/
+│  └─ index.html             Panel para revisar, corregir y puntuar
+├─ arquitectura.txt          Esta documentacion
+└─ README.md                 Puesta en marcha y despliegue
+
+INTERFAZ DEL ESTUDIANTE
+-----------------------
+El formulario recoge:
+- Nombre o alias de la persona que entrega el conjunto.
+- Instituto o centro educativo.
+- Titulo opcional del conjunto y fecha de observacion.
+- Varias fichas de planta: nombre propuesto, lugar/habitat, observaciones y una o mas fotos.
+
+Al pulsar "Enviar conjunto", el ejemplo almacena los datos en el navegador. Las imagenes se reducen antes de guardarse para que el prototipo sea mas ligero. Este modo es adecuado para pruebas en un mismo dispositivo, no para una entrega real desde varios alumnos.
+
+INTERFAZ DEL PROFESOR
+---------------------
+El panel muestra los conjuntos guardados con la identidad del autor y el centro. Para cada planta permite:
+- Marcar la propuesta como correcta o incorrecta.
+- Escribir el nombre correcto o aceptado.
+- Anadir una observacion de correccion.
+- Asignar una nota de 0 a 10 al conjunto.
+- Guardar la correccion.
+
+Tambien incluye carga de datos de demostracion, exportacion JSON y borrado de los datos locales de prueba.
+
+ALTERNATIVAS PARA PRODUCCION
+----------------------------
+Opcion A: Google Forms + Google Sheets + Google Drive
+- Crear un formulario de Google con nombre, instituto, nombre de planta y carga de archivos.
+- Incrustarlo o enlazarlo desde estudiante/index.html.
+- Google Forms guarda las respuestas en una hoja de calculo y los archivos en Drive.
+- El profesorado puede corregir directamente en la hoja, anadiendo columnas como estado, nombre_correcto, comentario y nota.
+- Es la opcion mas sencilla si el alumnado tiene cuenta de Google y no se necesita una interfaz de correccion propia.
+
+Opcion B: Firebase (recomendada si se quiere conservar esta interfaz)
+- Firebase Authentication: acceso para alumnado y profesorado.
+- Cloud Firestore: conjuntos, plantas y correcciones.
+- Firebase Storage: fotografias.
+- Reglas de seguridad: cada alumno solo puede crear/leer sus propios envios; el rol de profesor puede revisarlos todos.
+- El codigo de la web puede seguir desplegado en GitHub Pages, o alojarse tambien con Firebase Hosting.
+
+Opcion C: Supabase
+- Supabase Auth, Storage y Postgres ofrecen una alternativa equivalente.
+- Definir politicas RLS para separar alumnos, centros y profesorado.
+
+MODELO DE DATOS PROPUESTO
+-------------------------
+Collection/submission:
+{
+  id,
+  studentName,
+  institute,
+  title,
+  date,
+  createdAt,
+  plants: [
+    {
+      id,
+      proposedName,
+      habitat,
+      notes,
+      photoUrls: [],
+      assessment: {
+        status: 'pendiente' | 'correcto' | 'incorrecto',
+        correctName,
+        comment
+      }
+    }
+  ],
+  assessment: { grade, teacherComment, updatedAt }
+}
+
+SEGURIDAD Y PRIVACIDAD
+----------------------
+- No publicar identificadores personales de menores en una web abierta.
+- Usar alias o identificadores internos cuando sea posible.
+- Limitar los permisos de lectura y escritura con autenticacion y reglas de base de datos.
+- Definir cuanto tiempo se conservan fotos y datos, y obtener las autorizaciones necesarias.
+- No subir secretos, claves de administrador ni credenciales al repositorio de GitHub.
+
+DESPLIEGUE EN GITHUB PAGES
+--------------------------
+1. Crear un repositorio y subir todos los ficheros.
+2. En GitHub: Settings > Pages.
+3. Seleccionar "Deploy from a branch", rama main y carpeta /(root).
+4. Guardar. GitHub mostrara la URL publica.
+5. Si se usa Firebase/Supabase, configurar las variables publicas necesarias siguiendo su documentacion y sin exponer claves privadas.
+
+LIMITACION DEL PROTOTIPO
+------------------------
+Esta version usa localStorage; por tanto, los datos quedan en el navegador que realizo el envio. Para uso real con varios dispositivos hay que sustituir las funciones de almacenamiento de app.js por llamadas al backend elegido.
