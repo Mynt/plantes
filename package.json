@@ -1,0 +1,11 @@
+{
+  "name": "identificacion-plantas",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "devDependencies": {
+    "firebase-admin": "^12.6.0"
+  }
+}
