@@ -25,7 +25,11 @@ export function ensureAnonAuth() {
       (user) => {
         if (user) {
           unsubscribe();
-          resolve(user);
+          // Force a fresh ID token before the caller writes to Firestore.
+          // A token from a sign-in that just completed can occasionally
+          // not yet be fully propagated on the backend, causing a
+          // transient permission-denied on the very next write.
+          user.getIdToken(true).then(() => resolve(user), reject);
           return;
         }
         signInAnonymously(auth).catch((err) => {
