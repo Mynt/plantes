@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isTeacher() {
+      return request.auth != null && request.auth.token.teacher == true;
+    }
+
+    match /submissions/{submissionId} {
+      allow create: if request.auth != null
+        && request.resource.data.authUid == request.auth.uid
+        && (
+          !('listId' in request.resource.data)
+          || request.resource.data.listId == null
+          || submissionId == request.resource.data.listId + '_' + request.auth.uid
+        );
+      allow read, update, delete: if isTeacher();
+    }
+
+    match /plantLists/{listId} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+
+    match /plantListPhotos/{listId} {
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/plantLists/$(listId)).data.published == true
+        && exists(/databases/$(database)/documents/submissions/$(listId + '_' + request.auth.uid))
+        && get(/databases/$(database)/documents/submissions/$(listId + '_' + request.auth.uid)).data.complete == true;
+      allow write: if isTeacher();
+    }
+  }
+}

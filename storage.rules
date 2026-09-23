@@ -1,0 +1,26 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isTeacher() {
+      return request.auth != null && request.auth.token.teacher == true;
+    }
+
+    match /submissions/{allPaths=**} {
+      allow write: if request.auth != null
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow read: if true;
+    }
+
+    match /plantLists/{listId}/{allPaths=**} {
+      allow write: if isTeacher()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow read: if request.auth != null
+        && firestore.get(/databases/(default)/documents/plantLists/$(listId)).data.published == true
+        && firestore.exists(/databases/(default)/documents/submissions/$(listId + '_' + request.auth.uid))
+        && firestore.get(/databases/(default)/documents/submissions/$(listId + '_' + request.auth.uid)).data.complete == true;
+    }
+  }
+}
