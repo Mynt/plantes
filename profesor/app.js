@@ -16,6 +16,12 @@ const loginStatus = document.getElementById("login-status");
 const panel = document.getElementById("panel");
 const submissionsList = document.getElementById("submissions-list");
 
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   loginStatus.textContent = "Entrando…";
@@ -60,8 +66,8 @@ async function renderSubmissions() {
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
-      <h2>${submission.title || "(sin título)"} — ${submission.studentAlias}</h2>
-      <p class="muted">${submission.institute} · ${submission.date || ""}</p>
+      <h2>${escapeHtml(submission.title) || "(sin título)"} — ${escapeHtml(submission.studentAlias)}</h2>
+      <p class="muted">${escapeHtml(submission.institute)} · ${submission.date || ""}</p>
       <div class="plants"></div>
       <div class="field">
         <label>Nota final (0-10)</label>
@@ -81,8 +87,8 @@ async function renderSubmissions() {
       plantCard.className = "plant-card";
       plantCard.dataset.plantIndex = String(idx);
       plantCard.innerHTML = `
-        <h3>${plant.proposedName}</h3>
-        <p class="muted">${plant.habitat || ""} — ${plant.notes || ""}</p>
+        <h3>${escapeHtml(plant.proposedName)}</h3>
+        <p class="muted">${escapeHtml(plant.habitat || "")} — ${escapeHtml(plant.notes || "")}</p>
         <div class="photo-grid">
           ${plant.photoUrls.map((url) => `<img src="${url}" />`).join("")}
         </div>
