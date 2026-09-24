@@ -130,11 +130,27 @@ body {
 
 .app-logo {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: var(--spacing);
 }
 
-.app-logo img {
-  width: 120px;
+.logo-circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logo-circle img {
+  max-width: 78%;
+  max-height: 78%;
+  width: auto;
   height: auto;
+  object-fit: contain;
 }
